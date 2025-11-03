@@ -13,6 +13,7 @@ use CodeIgniter\Filters\PageCache;
 use CodeIgniter\Filters\PerformanceMetrics;
 use CodeIgniter\Filters\SecureHeaders;
 use App\Filters\DakoiiAuthFilter;
+use App\Filters\AdminAuthFilter;
 
 class Filters extends BaseFilters
 {
@@ -36,6 +37,7 @@ class Filters extends BaseFilters
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
         'dakoiiauth'    => DakoiiAuthFilter::class,
+        'adminauth'     => AdminAuthFilter::class,
     ];
 
     /**

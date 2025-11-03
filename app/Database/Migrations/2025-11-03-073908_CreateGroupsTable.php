@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateOrganizationsTable extends Migration
+class CreateGroupsTable extends Migration
 {
     public function up()
     {
@@ -15,22 +15,30 @@ class CreateOrganizationsTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
-            'org_code' => [
+            'group_code' => [
                 'type'       => 'VARCHAR',
-                'constraint' => '4',
+                'constraint' => '10',
                 'null'       => false,
-                'comment'    => 'Unique 4-digit organization code (11XX, 12XX, 13XX, etc.)',
+                'comment'    => 'Unique group code (g201, g202, g203, etc.)',
             ],
-            'org_name' => [
+            'group_name' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '255',
                 'null'       => false,
             ],
-            'org_logo' => [
-                'type'       => 'VARCHAR',
-                'constraint' => '255',
+            'organization_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => false,
+                'comment'    => 'Foreign key to organizations table',
+            ],
+            'parent_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
                 'null'       => true,
-                'comment'    => 'Organization logo filename',
+                'comment'    => 'Parent group for hierarchical structure',
             ],
             'description' => [
                 'type' => 'TEXT',
@@ -75,12 +83,16 @@ class CreateOrganizationsTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('org_code');
-        $this->forge->createTable('organizations');
+        $this->forge->addUniqueKey('group_code');
+        $this->forge->addKey('organization_id');
+        $this->forge->addKey('parent_id');
+        $this->forge->addForeignKey('organization_id', 'organizations', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('parent_id', 'groups', 'id', 'SET NULL', 'CASCADE');
+        $this->forge->createTable('groups');
     }
 
     public function down()
     {
-        $this->forge->dropTable('organizations');
+        $this->forge->dropTable('groups');
     }
 }

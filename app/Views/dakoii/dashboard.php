@@ -107,6 +107,9 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
+                        <a href="<?= base_url('dakoii/organizations') ?>" class="btn btn-outline-primary text-start">
+                            <i class="bi bi-building me-2"></i>Manage Organizations
+                        </a>
                         <button class="btn btn-outline-primary text-start" disabled>
                             <i class="bi bi-plus-circle me-2"></i>Add New Document
                         </button>

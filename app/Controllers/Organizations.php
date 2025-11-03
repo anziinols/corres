@@ -31,7 +31,7 @@ class Organizations extends ResourceController
             'organizations' => $model->getOrganizationsWithAudit(),
         ];
 
-        return view('dakoii/organizations/index', $data);
+        return view('dakoii/organizations/dakoii_organizations_list', $data);
     }
 
     /**
@@ -48,7 +48,7 @@ class Organizations extends ResourceController
             'nextOrgCode' => $model->getNextOrgCode(),
         ];
 
-        return view('dakoii/organizations/create', $data);
+        return view('dakoii/organizations/dakoii_organizations_create', $data);
     }
 
     /**
@@ -134,7 +134,7 @@ class Organizations extends ResourceController
             'organization' => $organization,
         ];
 
-        return view('dakoii/organizations/show', $data);
+        return view('dakoii/organizations/dakoii_organizations_view', $data);
     }
 
     /**
@@ -159,7 +159,7 @@ class Organizations extends ResourceController
             'organization' => $organization,
         ];
 
-        return view('dakoii/organizations/edit', $data);
+        return view('dakoii/organizations/dakoii_organizations_edit', $data);
     }
 
     /**

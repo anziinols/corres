@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateOrganizationsTable extends Migration
+class CreateUsersTable extends Migration
 {
     public function up()
     {
@@ -15,26 +15,36 @@ class CreateOrganizationsTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
-            'org_code' => [
-                'type'       => 'VARCHAR',
-                'constraint' => '4',
-                'null'       => false,
-                'comment'    => 'Unique 4-digit organization code (11XX, 12XX, 13XX, etc.)',
-            ],
-            'org_name' => [
+            'name' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '255',
                 'null'       => false,
             ],
-            'org_logo' => [
+            'email' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '255',
+                'null'       => false,
+                'comment'    => 'Unique email address',
+            ],
+            'password' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '255',
+                'null'       => false,
+                'comment'    => 'Hashed password (minimum 4 characters)',
+            ],
+            'organization_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => false,
+                'comment'    => 'Foreign key to organizations table',
+            ],
+            'group_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
                 'null'       => true,
-                'comment'    => 'Organization logo filename',
-            ],
-            'description' => [
-                'type' => 'TEXT',
-                'null' => true,
+                'comment'    => 'Foreign key to groups table',
             ],
             'status' => [
                 'type'       => 'ENUM',
@@ -75,12 +85,16 @@ class CreateOrganizationsTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('org_code');
-        $this->forge->createTable('organizations');
+        $this->forge->addUniqueKey('email');
+        $this->forge->addKey('organization_id');
+        $this->forge->addKey('group_id');
+        $this->forge->addForeignKey('organization_id', 'organizations', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('group_id', 'groups', 'id', 'SET NULL', 'CASCADE');
+        $this->forge->createTable('users');
     }
 
     public function down()
     {
-        $this->forge->dropTable('organizations');
+        $this->forge->dropTable('users');
     }
 }
