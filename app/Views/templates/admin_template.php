@@ -190,6 +190,19 @@
             border: 1px solid var(--admin-border);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .nav-link.active {
+            color: var(--admin-white) !important;
+            font-weight: 600;
+        }
     </style>
     
     <?= $this->renderSection('styles') ?>
@@ -204,7 +217,41 @@
             </a>
 
             <?php if (session()->has('admin_logged_in') && session()->get('admin_logged_in')): ?>
-            <div class="ms-auto">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= base_url('admin/dashboard') ?>">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= base_url('admin/correspondences') ?>">
+                            <i class="bi bi-envelope-paper me-1"></i>Correspondences
+                        </a>
+                    </li>
+                    <?php if (session()->get('admin_is_admin')): ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear-fill me-1"></i>Admin Panel
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-people me-1"></i>Users
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-sliders me-1"></i>Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+                </ul>
                 <ul class="navbar-nav align-items-lg-center">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -247,6 +294,8 @@
                     </li>
                 </ul>
             </div>
+            <?php else: ?>
+            <div class="ms-auto"></div>
             <?php endif; ?>
         </div>
     </nav>

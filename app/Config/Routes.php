@@ -17,6 +17,17 @@ $routes->group('', ['filter' => 'csrf'], static function ($routes) {
     $routes->group('admin', ['filter' => 'adminauth'], static function ($routes) {
         $routes->get('dashboard', 'Admin::dashboard');
         $routes->post('logout', 'Admin::logout');
+
+        // Correspondences Management (RESTful routes)
+        $routes->get('correspondences', 'Correspondences::index');
+        $routes->get('correspondences/new', 'Correspondences::new');
+        $routes->post('correspondences', 'Correspondences::create');
+        $routes->get('correspondences/generate-number', 'Correspondences::generateNumber');
+        $routes->get('correspondences/(:num)', 'Correspondences::show/$1');
+        $routes->get('correspondences/(:num)/edit', 'Correspondences::edit/$1');
+        $routes->put('correspondences/(:num)', 'Correspondences::update/$1');
+        $routes->patch('correspondences/(:num)', 'Correspondences::update/$1');
+        $routes->delete('correspondences/(:num)', 'Correspondences::delete/$1');
     });
 });
 
@@ -61,5 +72,15 @@ $routes->group('dakoii', ['filter' => 'csrf'], static function ($routes) {
         $routes->put('organizations/(:num)/users/(:num)', 'Users::update/$1/$2');
         $routes->patch('organizations/(:num)/users/(:num)', 'Users::update/$1/$2');
         $routes->delete('organizations/(:num)/users/(:num)', 'Users::delete/$1/$2');
+
+        // Correspondence Types Management (RESTful routes)
+        $routes->get('correspondence-types', 'CorrespondenceTypes::index');
+        $routes->get('correspondence-types/new', 'CorrespondenceTypes::new');
+        $routes->post('correspondence-types', 'CorrespondenceTypes::create');
+        $routes->get('correspondence-types/(:num)', 'CorrespondenceTypes::show/$1');
+        $routes->get('correspondence-types/(:num)/edit', 'CorrespondenceTypes::edit/$1');
+        $routes->put('correspondence-types/(:num)', 'CorrespondenceTypes::update/$1');
+        $routes->patch('correspondence-types/(:num)', 'CorrespondenceTypes::update/$1');
+        $routes->delete('correspondence-types/(:num)', 'CorrespondenceTypes::delete/$1');
     });
 });

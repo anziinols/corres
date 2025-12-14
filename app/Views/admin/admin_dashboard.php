@@ -142,14 +142,14 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-3">
-                        <a href="#" class="btn btn-outline-primary btn-lg text-start d-flex align-items-center">
+                        <a href="<?= base_url('admin/correspondences/new') ?>" class="btn btn-outline-primary btn-lg text-start d-flex align-items-center">
                             <i class="bi bi-plus-circle me-3" style="font-size: 1.5rem;"></i>
                             <div>
                                 <div class="fw-semibold">Add New Document</div>
                                 <small class="text-muted">Create and register a new correspondence</small>
                             </div>
                         </a>
-                        <a href="#" class="btn btn-outline-primary btn-lg text-start d-flex align-items-center">
+                        <a href="<?= base_url('admin/correspondences') ?>" class="btn btn-outline-primary btn-lg text-start d-flex align-items-center">
                             <i class="bi bi-search me-3" style="font-size: 1.5rem;"></i>
                             <div>
                                 <div class="fw-semibold">Search Documents</div>

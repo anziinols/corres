@@ -152,12 +152,24 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="<?= base_url('dakoii/dashboard') ?>">
                             <i class="bi bi-speedometer2 me-1"></i>Dashboard
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= base_url('dakoii/organizations') ?>">
+                            <i class="bi bi-building me-1"></i>Organizations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= base_url('dakoii/correspondence-types') ?>">
+                            <i class="bi bi-tags me-1"></i>Correspondence Types
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle me-1"></i><?= esc(session()->get('dakoii_name')) ?>
