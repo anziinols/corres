@@ -56,6 +56,8 @@ class Correspondences extends ResourceController
             'users' => $userModel->where('status', 'active')->findAll(),
             'correspondence_types' => $typeModel->orderBy('type_number', 'ASC')->findAll(),
             'suggested_number' => $corrModel->generateCorrespondenceNumber(),
+            'ai_api_key' => getenv('AI_API_KEY'),
+            'ai_model' => getenv('AI_MODEL'),
         ];
 
         return view('admin/correspondences/correspondences_create', $data);
@@ -77,6 +79,16 @@ class Correspondences extends ResourceController
         if (empty($postData['correspondence_number'])) {
             $department = $postData['department'] ?? null;
             $postData['correspondence_number'] = $corrModel->generateCorrespondenceNumber($department);
+        }
+
+        // Handle File Upload
+        $file = $this->request->getFile('correspondence_file');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            // Move to writable/uploads/correspondences
+            $file->move(WRITEPATH . 'uploads/correspondences', $newName);
+            $postData['file_path'] = 'uploads/correspondences/' . $newName;
+            $postData['file_type'] = $file->getClientMimeType();
         }
         
         // Set registered_by from session

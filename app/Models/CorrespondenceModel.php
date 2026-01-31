@@ -16,6 +16,8 @@ class CorrespondenceModel extends Model
         'correspondence_number',
         'reference_number',
         'subject',
+        'file_path',
+        'file_type',
         'correspondence_type',
         'correspondence_direction',
         'date_received',
