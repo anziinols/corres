@@ -124,3 +124,8 @@ _modules/*
 
 /results/
 /phpunit*.xml
+.agent/
+.claude/
+firebase-debug.log
+public/uploads/
+

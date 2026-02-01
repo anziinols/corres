@@ -3,12 +3,12 @@
 <?= $this->section('content') ?>
 
 <!-- Hero Section -->
-<section class="hero-section py-5" style="background: linear-gradient(135deg, #2C5F8D 0%, #1E4A6D 100%);">
+<section class="hero-section py-5" style="background: linear-gradient(135deg, #1A3A5F 0%, #0F2C44 100%);">
     <div class="container">
         <div class="row align-items-center text-white">
             <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">Welcome to Correspondence Management System</h1>
-                <p class="lead mb-4">Streamline your document workflow with our comprehensive correspondence tracking and management solution.</p>
+                <h1 class="display-4 fw-bold mb-4">Corporate Correspondence Management System</h1>
+                <p class="lead mb-4">Professional document tracking and management solution for enterprise organizations.</p>
                 <div class="d-flex gap-3">
                     <a href="<?= base_url('login') ?>" class="btn btn-light btn-lg px-4">Get Started</a>
                     <a href="<?= base_url('about') ?>" class="btn btn-outline-light btn-lg px-4">Learn More</a>

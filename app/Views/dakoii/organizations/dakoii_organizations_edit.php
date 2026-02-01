@@ -89,11 +89,17 @@
 
                         <!-- Current Logo -->
                         <?php if ($organization['org_logo']): ?>
+                            <?php
+                                // Handle both old (filename only) and new (full path with public/ prefix) formats
+                                $logoPath = strpos($organization['org_logo'], 'public/') === 0
+                                    ? $organization['org_logo']
+                                    : 'public/uploads/organizations/' . $organization['org_logo'];
+                            ?>
                             <div class="mb-3">
                                 <label class="form-label">Current Logo</label>
                                 <div>
-                                    <img src="<?= base_url('uploads/organizations/' . esc($organization['org_logo'])) ?>" 
-                                         alt="Current Logo" 
+                                    <img src="<?= base_url(esc($logoPath)) ?>"
+                                         alt="Current Logo"
                                          class="img-thumbnail"
                                          style="max-width: 200px; max-height: 200px;">
                                 </div>

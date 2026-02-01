@@ -78,7 +78,7 @@
                                         <th>Direction</th>
                                         <th>Type</th>
                                         <th>Date Received</th>
-                                        <th>Organization</th>
+                                        <th>Organization / Group</th>
                                         <th>Status</th>
                                         <th>Priority</th>
                                         <th class="text-end">Actions</th>
@@ -89,9 +89,6 @@
                                         <tr>
                                             <td>
                                                 <strong><?= esc($corr['correspondence_number']) ?></strong>
-                                                <?php if (!empty($corr['reference_number'])): ?>
-                                                    <br><small class="text-muted">Ref: <?= esc($corr['reference_number']) ?></small>
-                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -111,17 +108,24 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <small><?= esc($corr['correspondence_type']) ?></small>
+                                                <small><?= esc($corr['correspondence_type_name'] ?? $corr['correspondence_type']) ?></small>
                                             </td>
                                             <td>
                                                 <small><?= date('d M Y', strtotime($corr['date_received'])) ?></small>
                                             </td>
                                             <td>
-                                                <?php if (!empty($corr['org_name'])): ?>
-                                                    <small><?= esc($corr['org_name']) ?></small>
-                                                <?php else: ?>
-                                                    <small class="text-muted">-</small>
-                                                <?php endif; ?>
+                                                <small>
+                                                    <?php if (!empty($corr['org_name'])): ?>
+                                                        <strong><?= esc($corr['org_name']) ?></strong>
+                                                        <?php if (!empty($corr['group_name'])): ?>
+                                                            <br><span class="text-muted"><?= esc($corr['group_name']) ?></span>
+                                                        <?php endif; ?>
+                                                    <?php elseif (!empty($corr['group_name'])): ?>
+                                                        <?= esc($corr['group_name']) ?>
+                                                    <?php else: ?>
+                                                        -
+                                                    <?php endif; ?>
+                                                </small>
                                             </td>
                                             <td>
                                                 <?php
@@ -141,10 +145,9 @@
                                             <td>
                                                 <?php
                                                 $priorityBadge = [
-                                                    'LOW' => 'bg-secondary',
                                                     'NORMAL' => 'bg-primary',
-                                                    'HIGH' => 'bg-warning',
-                                                    'URGENT' => 'bg-danger'
+                                                    'URGENT' => 'bg-danger',
+                                                    'CONFIDENTIAL' => 'bg-dark'
                                                 ];
                                                 ?>
                                                 <span class="badge <?= $priorityBadge[$corr['priority']] ?? 'bg-primary' ?>">
@@ -177,16 +180,26 @@
     </div>
 </div>
 
-<!-- DataTables CSS -->
+<!-- DataTables & Toastr CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 
-<!-- DataTables JS -->
+<!-- Third-party JS -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
 $(document).ready(function() {
+    // Initialize Toastr
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "3000"
+    };
+
     $('#correspondencesTable').DataTable({
         order: [[4, 'desc']], // Sort by date received
         pageLength: 25,
@@ -214,10 +227,12 @@ function deleteCorrespondence(id) {
                 $('input[name="<?= csrf_token() ?>"]').val(response.csrf_token_value);
                 
                 if (response.success) {
-                    alert(response.message);
-                    location.reload();
+                    toastr.success(response.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
                 } else {
-                    alert(response.message);
+                    toastr.error('Error: ' + response.message);
                 }
             },
             error: function(xhr) {
@@ -225,7 +240,7 @@ function deleteCorrespondence(id) {
                 if (response && response.csrf_token_value) {
                     $('input[name="<?= csrf_token() ?>"]').val(response.csrf_token_value);
                 }
-                alert('Error: ' + (response ? response.message : 'Failed to delete correspondence'));
+                toastr.error('Error: ' + (response ? response.message : 'Failed to delete correspondence'));
             }
         });
     }

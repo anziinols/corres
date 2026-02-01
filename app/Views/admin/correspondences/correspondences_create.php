@@ -15,14 +15,14 @@
     <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h2 class="mb-1">
-                                <i class="bi bi-plus-circle me-2"></i>Register New Correspondence
+                            <h2 class="mb-1 fw-bold text-primary">
+                                <i class="bi bi-plus-circle me-2"></i>New Correspondence
                             </h2>
-                            <p class="text-muted mb-0">Fill in the details to register a new correspondence</p>
+                            <p class="text-muted mb-0">Create a new record</p>
                         </div>
                         <div>
                             <a href="<?= base_url('admin/correspondences') ?>" class="btn btn-outline-secondary">
@@ -38,232 +38,139 @@
     <!-- Create Form -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div id="aiDropZone" class="mb-4 p-5 text-center border rounded bg-light" style="border: 2px dashed #0d6efd; cursor: pointer; transition: all 0.2s;">
-                        <div id="dropZoneContent">
-                            <i class="bi bi-cloud-arrow-up display-4 text-primary mb-3"></i>
-                            <h5 class="fw-bold">Drag & Drop Document Here</h5>
-                            <p class="text-muted mb-0">Upload PDF or Image to Auto-Fill Form using AI</p>
-                            <small class="text-muted">(Supports .pdf, .jpg, .png)</small>
-                            <div id="fileNameDisplay" class="mt-2 fw-bold text-success d-none"></div>
-                        </div>
-                        <div id="dropZoneLoading" class="d-none">
-                            <div class="spinner-border text-primary mb-3" role="status"></div>
-                            <h5 class="fw-bold animate-pulse">Analyzing Document...</h5>
-                            <p class="text-muted" id="aiStatusText">Extracting information...</p>
-                        </div>
-                    </div>
-
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
                     <form id="createCorrespondenceForm" enctype="multipart/form-data">
                         <?= csrf_field() ?>
+
+                        <!-- 1. Attachment (AI Auto-Fill) -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3">Upload Document</h5>
+                        <div id="aiDropZone" class="mb-4 p-5 text-center border rounded bg-light" style="border: 2px dashed #0d6efd; cursor: pointer; transition: all 0.2s;">
+                            <div id="dropZoneContent">
+                                <i class="bi bi-cloud-arrow-up display-4 text-primary mb-3"></i>
+                                <h5 class="fw-bold">Drag & Drop Document Here</h5>
+                                <p class="text-muted mb-0">Upload PDF or Image to Auto-Fill Form using AI</p>
+                                <small class="text-muted">(Supports .pdf, .jpg, .png)</small>
+                                <div id="fileNameDisplay" class="mt-2 fw-bold text-success d-none"></div>
+                            </div>
+                            <div id="dropZoneLoading" class="d-none">
+                                <div class="spinner-border text-primary mb-3" role="status"></div>
+                                <h5 class="fw-bold animate-pulse">Analyzing Document...</h5>
+                                <p class="text-muted" id="aiStatusText">Extracting information...</p>
+                            </div>
+                        </div>
                         <input type="file" id="correspondence_file" name="correspondence_file" class="d-none" accept=".pdf,.jpg,.jpeg,.png">
-                        
-                        <!-- Basic Information -->
-                        <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Basic Information</h5>
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label for="correspondence_number" class="form-label">Correspondence Number <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="correspondence_number" name="correspondence_number" 
-                                       value="<?= esc($suggested_number) ?>" required>
-                                <small class="text-muted">Auto-generated or enter manually</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="reference_number" class="form-label">External Reference Number</label>
-                                <input type="text" class="form-control" id="reference_number" name="reference_number">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="department" class="form-label">Department</label>
-                                <input type="text" class="form-control" id="department" name="department" 
-                                       placeholder="e.g., HRM, FIN, IT">
-                                <small class="text-muted">For department-based numbering</small>
-                            </div>
-                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label for="subject" class="form-label">Subject/Particulars <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="subject" name="subject" rows="2" required></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Direction & Type -->
-                        <h5 class="mb-3 mt-4"><i class="bi bi-arrow-left-right me-2"></i>Direction & Type</h5>
-                        <div class="row mb-3">
+                        <!-- 2. Header Details -->
+                        <div class="row mb-4">
                             <div class="col-md-4">
-                                <label for="correspondence_direction" class="form-label">Direction <span class="text-danger">*</span></label>
+                                <label for="correspondence_number" class="form-label text-uppercase text-secondary fw-bold small">Correspondence Number</label>
+                                <input type="text" class="form-control bg-light" id="correspondence_number" name="correspondence_number" 
+                                       value="<?= esc($suggested_number) ?>" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="date_received" class="form-label text-uppercase text-secondary fw-bold small">Date Received</label>
+                                <input type="date" class="form-control" id="date_received" name="date_received" 
+                                       value="<?= date('Y-m-d') ?>" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="correspondence_direction" class="form-label text-uppercase text-secondary fw-bold small">Direction</label>
                                 <select class="form-select" id="correspondence_direction" name="correspondence_direction" required>
                                     <option value="INWARD" selected>Inward</option>
                                     <option value="OUTWARD">Outward</option>
                                     <option value="INTERNAL">Internal</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label for="correspondence_type" class="form-label">Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="correspondence_type" name="correspondence_type" required>
-                                    <option value="">-- Select Type --</option>
-                                    <?php if (!empty($correspondence_types)): ?>
-                                        <?php foreach ($correspondence_types as $type): ?>
-                                            <option value="<?= esc($type['type_number']) ?>">
-                                                <?= esc($type['type_number']) ?> - <?= esc($type['name']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <option value="" disabled>No types available</option>
-                                    <?php endif; ?>
-                                </select>
-                                <small class="text-muted">
-                                    <a href="<?= base_url('dakoii/correspondence-types') ?>" target="_blank" class="text-decoration-none">
-                                        <i class="bi bi-plus-circle"></i> Manage Types
-                                    </a>
-                                </small>
+                        </div>
+
+                        <!-- 3. Main Content -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3 mt-4">Main Content</h5>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label fw-bold">Subject</label>
+                            <input type="text" class="form-control form-control-lg" id="subject" name="subject" placeholder="Headline / Title of the file" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="remarks" class="form-label fw-bold">Brief Description</label>
+                                <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="Short summary of contents..."></textarea>
                             </div>
                             <div class="col-md-4">
-                                <label for="organization_id" class="form-label">Organization</label>
-                                <select class="form-select" id="organization_id" name="organization_id">
-                                    <option value="">Select Organization</option>
-                                    <?php foreach ($organizations as $org): ?>
-                                        <option value="<?= $org['id'] ?>"><?= esc($org['org_name']) ?> (<?= esc($org['org_code']) ?>)</option>
+                                <label for="correspondence_type" class="form-label fw-bold">Document Type</label>
+                                <select class="form-select" id="correspondence_type" name="correspondence_type" required>
+                                    <option value="">Select Type</option>
+                                    <?php foreach ($correspondence_types as $type): ?>
+                                        <option value="<?= esc($type['type_number']) ?>"><?= esc($type['name']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Dates -->
-                        <h5 class="mb-3 mt-4"><i class="bi bi-calendar me-2"></i>Dates</h5>
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label for="date_received" class="form-label">Date Received <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="date_received" name="date_received" 
-                                       value="<?= date('Y-m-d') ?>" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="original_date" class="form-label">Original Date (on document)</label>
-                                <input type="date" class="form-control" id="original_date" name="original_date">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="date_sent" class="form-label">Date Sent (for outward)</label>
-                                <input type="date" class="form-control" id="date_sent" name="date_sent">
-                            </div>
-                        </div>
-
-                        <!-- Sender Information (for Inward) -->
-                        <div id="senderSection">
-                            <h5 class="mb-3 mt-4"><i class="bi bi-person-fill me-2"></i>Sender Information</h5>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="sender_name" class="form-label">Sender Name</label>
-                                    <input type="text" class="form-control" id="sender_name" name="sender_name">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="sender_organization" class="form-label">Sender Organization</label>
-                                    <input type="text" class="form-control" id="sender_organization" name="sender_organization">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="sender_address" class="form-label">Sender Address</label>
-                                    <textarea class="form-control" id="sender_address" name="sender_address" rows="2"></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="sender_contact" class="form-label">Sender Contact</label>
-                                    <input type="text" class="form-control" id="sender_contact" name="sender_contact" 
-                                           placeholder="Email or Phone">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Recipient Information (for Outward) -->
-                        <div id="recipientSection" style="display: none;">
-                            <h5 class="mb-3 mt-4"><i class="bi bi-person-check-fill me-2"></i>Recipient Information</h5>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="recipient_name" class="form-label">Recipient Name</label>
-                                    <input type="text" class="form-control" id="recipient_name" name="recipient_name">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="recipient_organization" class="form-label">Recipient Organization</label>
-                                    <input type="text" class="form-control" id="recipient_organization" name="recipient_organization">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="recipient_address" class="form-label">Recipient Address</label>
-                                    <textarea class="form-control" id="recipient_address" name="recipient_address" rows="2"></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="dispatch_method" class="form-label">Dispatch Method</label>
-                                    <select class="form-select" id="dispatch_method" name="dispatch_method">
-                                        <option value="">Select Method</option>
-                                        <option value="Email">Email</option>
-                                        <option value="Post">Post</option>
-                                        <option value="Courier">Courier</option>
-                                        <option value="Hand Delivery">Hand Delivery</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Priority & Status -->
-                        <h5 class="mb-3 mt-4"><i class="bi bi-flag-fill me-2"></i>Priority & Status</h5>
+                        <!-- 4. Organization & Group -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3 mt-4">Organization & Group</h5>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="priority" class="form-label">Priority</label>
+                                <label for="organization_id" class="form-label fw-bold">Organization</label>
+                                <select class="form-select" id="organization_id" name="organization_id">
+                                    <option value="">Select Organization</option>
+                                    <?php foreach ($organizations as $org): ?>
+                                        <option value="<?= $org['id'] ?>"><?= esc($org['org_name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="group_id" class="form-label fw-bold">Group / Department</label>
+                                <select class="form-select" id="group_id" name="group_id">
+                                    <option value="">Select Group</option>
+                                    <?php foreach ($groups as $group): ?>
+                                        <option value="<?= $group['id'] ?>" data-org="<?= $group['organization_id'] ?>"><?= esc($group['group_name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 5. Sender & Status -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3 mt-4">Sender & Status</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="sender_name" class="form-label fw-bold">Sender / Organization</label>
+                                <input type="text" class="form-control" id="sender_name" name="sender_name" placeholder="e.g. John Smith - Dakoii Systems">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="priority" class="form-label fw-bold">Priority</label>
                                 <select class="form-select" id="priority" name="priority">
-                                    <option value="LOW">Low</option>
                                     <option value="NORMAL" selected>Normal</option>
-                                    <option value="HIGH">High</option>
                                     <option value="URGENT">Urgent</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status" name="status">
-                                    <option value="REGISTERED" selected>Registered</option>
-                                    <option value="REFERRED">Referred</option>
-                                    <option value="IN_PROCESS">In Process</option>
-                                    <option value="ACTIONED">Actioned</option>
-                                    <option value="COMPLETED">Completed</option>
-                                    <option value="ARCHIVED">Archived</option>
+                                    <option value="CONFIDENTIAL">Confidential</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Filing & Archive -->
-                        <h5 class="mb-3 mt-4"><i class="bi bi-folder-fill me-2"></i>Filing & Archive</h5>
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label for="filing_reference" class="form-label">Filing Reference</label>
-                                <input type="text" class="form-control" id="filing_reference" name="filing_reference" 
-                                       placeholder="e.g., P/F-FKupiaw/F-HRM">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="archive_location" class="form-label">Archive Location</label>
-                                <input type="text" class="form-control" id="archive_location" name="archive_location">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="archive_date" class="form-label">Archive Date</label>
-                                <input type="date" class="form-control" id="archive_date" name="archive_date">
-                            </div>
+                        <!-- 6. Context & Relationships -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3 mt-4">Context & Relationships</h5>
+                        <div class="mb-3">
+                            <label for="linked_correspondence_ids" class="form-label fw-bold">Linked Correspondence</label>
+                            <select class="form-select" id="linked_correspondence_ids" name="linked_correspondence_ids[]" multiple="multiple">
+                                <?php foreach ($existing_correspondences as $existing): ?>
+                                    <option value="<?= $existing['id'] ?>">
+                                        <?= esc($existing['correspondence_number']) ?> - <?= esc($existing['subject']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <small class="text-muted">Search for existing files to tag relationships (e.g. replies, related docs).</small>
                         </div>
 
-                        <!-- Remarks -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label for="remarks" class="form-label">Remarks</label>
-                                <textarea class="form-control" id="remarks" name="remarks" rows="3"></textarea>
-                            </div>
-                        </div>
+                        <!-- Hidden Archive Fields (populated via modal if status is ARCHIVED) -->
+                        <input type="hidden" id="filing_reference" name="filing_reference" value="">
+                        <input type="hidden" id="archive_location" name="archive_location" value="">
+                        <input type="hidden" id="archive_date" name="archive_date" value="">
 
                         <!-- Submit Buttons -->
                         <div class="row mt-4">
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-check-circle me-2"></i>Register Correspondence
+                            <div class="col-12 text-end">
+                                <a href="<?= base_url('admin/correspondences') ?>" class="btn btn-link text-secondary text-decoration-none me-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="bi bi-check-circle me-2"></i>Register
                                 </button>
-                                <a href="<?= base_url('admin/correspondences') ?>" class="btn btn-secondary">
-                                    <i class="bi bi-x-circle me-2"></i>Cancel
-                                </a>
                             </div>
                         </div>
                     </form>
@@ -273,6 +180,10 @@
     </div>
 </div>
 
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <script>
     // AI Configuration
@@ -281,22 +192,6 @@
 
     // Initialize PDF.js worker
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Drag & Drop Logic
-        const dropZone = document.getElementById('aiDropZone');
-        const fileInput = document.getElementById('aiFileInput');
-        const dropZoneContent = document.getElementById('dropZoneContent');
-        const dropZoneLoading = document.getElementById('dropZoneLoading');
-        const statusText = document.getElementById('aiStatusText');
-
-        if (!dropZone) return;
-
-        // Click to upload
-        dropZone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) processFile(e.target.files[0]);
-        });
 
     document.addEventListener('DOMContentLoaded', function() {
         // Drag & Drop Logic
@@ -438,7 +333,7 @@
             const messages = [{
                 role: "user",
                 content: [
-                    { type: "text", text: "Analyze this document image. Extract the following fields and return ONLY a distinct JSON object: sender_name, sender_organization, sender_address, sender_contact, subject (summary), original_date (YYYY-MM-DD), priority (LOW, NORMAL, HIGH, URGENT)." },
+                    { type: "text", text: "Analyze this document image. Extract the following fields and return ONLY a distinct JSON object: sender_name (person and/or organization), subject (headline), description (brief summary of content), original_date (YYYY-MM-DD), priority (NORMAL, URGENT, CONFIDENTIAL)." },
                     contentPart
                 ]
             }];
@@ -487,23 +382,23 @@
             };
 
             setVal('subject', data.subject);
-            setVal('sender_name', data.sender_name);
-            setVal('sender_organization', data.sender_organization);
-            setVal('sender_address', data.sender_address);
-            setVal('sender_contact', data.sender_contact);
+            setVal('sender_name', data.sender_name); // Mapped to single field "Sender / Organization"
+            setVal('remarks', data.description); // Mapped to "Brief Description"
             setVal('original_date', data.original_date);
 
             // Handle Priority (Dropdown)
             if (data.priority) {
                 const prioritySelect = document.getElementById('priority');
                 const pVal = data.priority.toUpperCase();
-                if (['LOW', 'NORMAL', 'HIGH', 'URGENT'].includes(pVal)) {
+                if (['NORMAL', 'URGENT', 'CONFIDENTIAL'].includes(pVal)) {
                     prioritySelect.value = pVal;
+                } else if (pVal === 'HIGH') {
+                    prioritySelect.value = 'URGENT';
                 }
             }
 
             // Provide visual feedback
-            const inputs = ['subject', 'sender_name', 'sender_organization', 'sender_address', 'sender_contact', 'original_date', 'priority'];
+            const inputs = ['subject', 'sender_name', 'remarks', 'original_date', 'priority'];
             inputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -519,29 +414,26 @@
     });
 </script>
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<!-- Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Toggle sender/recipient sections based on direction
-    $('#correspondence_direction').change(function() {
-        if ($(this).val() === 'OUTWARD') {
-            $('#senderSection').hide();
-            $('#recipientSection').show();
-        } else {
-            $('#senderSection').show();
-            $('#recipientSection').hide();
-        }
-    });
+    // Initialize Toastr
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "3000"
+    };
 
-    // Auto-generate correspondence number when department changes
-    $('#department').blur(function() {
-        var dept = $(this).val();
-        if (dept) {
-            $.get('<?= base_url('admin/correspondences/generate-number') ?>', {department: dept}, function(response) {
-                if (response.success) {
-                    $('#correspondence_number').val(response.number);
-                }
-            });
-        }
+    // Initialize Select2
+    $('#linked_correspondence_ids').select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Search for files...',
+        allowClear: true
     });
 
     // Form submission
@@ -562,10 +454,12 @@ $(document).ready(function() {
                 $('input[name="<?= csrf_token() ?>"]').val(response.csrf_token_value);
                 
                 if (response.success) {
-                    alert(response.message);
-                    window.location.href = '<?= base_url('admin/correspondences') ?>';
+                    toastr.success(response.message);
+                    setTimeout(() => {
+                        window.location.href = '<?= base_url('admin/correspondences') ?>';
+                    }, 1000);
                 } else {
-                    alert('Error: ' + response.message);
+                    toastr.error('Error: ' + response.message);
                 }
             },
             error: function(xhr) {
@@ -576,12 +470,12 @@ $(document).ready(function() {
                 
                 var errorMsg = 'Failed to register correspondence';
                 if (response && response.errors) {
-                    errorMsg += ':\n';
+                    errorMsg += ':<br>';
                     for (var field in response.errors) {
-                        errorMsg += '- ' + response.errors[field] + '\n';
+                        errorMsg += '- ' + response.errors[field] + '<br>';
                     }
                 }
-                alert(errorMsg);
+                toastr.error(errorMsg);
             }
         });
     });

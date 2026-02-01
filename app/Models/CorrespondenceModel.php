@@ -14,35 +14,22 @@ class CorrespondenceModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'correspondence_number',
-        'reference_number',
         'subject',
         'file_path',
         'file_type',
         'correspondence_type',
         'correspondence_direction',
         'date_received',
-        'original_date',
-        'date_sent',
         'sender_name',
-        'sender_organization',
-        'sender_address',
-        'sender_contact',
-        'recipient_name',
-        'recipient_organization',
-        'recipient_address',
-        'dispatch_method',
         'priority',
         'status',
-        'department',
         'organization_id',
+        'group_id',
         'filing_reference',
         'archive_location',
         'archive_date',
         'registered_by',
         'registration_date',
-        'parent_correspondence_id',
-        'is_linked',
-        'linked_type',
         'remarks',
         'created_by',
         'updated_by',
@@ -58,30 +45,21 @@ class CorrespondenceModel extends Model
 
     // Validation
     protected $validationRules = [
+        'id' => 'permit_empty',
         'correspondence_number' => 'required|max_length[50]|is_unique[correspondences.correspondence_number,id,{id}]',
         'subject' => 'required|max_length[500]',
-        'correspondence_type' => 'required|in_list[LETTER,EMAIL,FAX,MEMO,CIRCULAR,PHONE,MEETING_MINUTES,REPORT,WHATSAPP,SMS,OTHER]',
+        'correspondence_type' => 'required|max_length[50]',
         'correspondence_direction' => 'required|in_list[INWARD,OUTWARD,INTERNAL]',
         'date_received' => 'required|valid_date',
-        'original_date' => 'permit_empty|valid_date',
-        'date_sent' => 'permit_empty|valid_date',
         'sender_name' => 'permit_empty|max_length[255]',
-        'sender_organization' => 'permit_empty|max_length[255]',
-        'sender_contact' => 'permit_empty|max_length[100]',
-        'recipient_name' => 'permit_empty|max_length[255]',
-        'recipient_organization' => 'permit_empty|max_length[255]',
-        'dispatch_method' => 'permit_empty|max_length[50]',
-        'priority' => 'permit_empty|in_list[LOW,NORMAL,HIGH,URGENT]',
+        'priority' => 'permit_empty|in_list[NORMAL,URGENT,CONFIDENTIAL]',
         'status' => 'permit_empty|in_list[REGISTERED,REFERRED,IN_PROCESS,ACTIONED,COMPLETED,ARCHIVED]',
-        'department' => 'permit_empty|max_length[50]',
         'organization_id' => 'permit_empty|numeric',
+        'group_id' => 'permit_empty|numeric',
         'filing_reference' => 'permit_empty|max_length[100]',
         'archive_location' => 'permit_empty|max_length[100]',
         'archive_date' => 'permit_empty|valid_date',
         'registered_by' => 'permit_empty|numeric',
-        'parent_correspondence_id' => 'permit_empty|numeric',
-        'is_linked' => 'permit_empty|in_list[0,1]',
-        'linked_type' => 'permit_empty|in_list[RESPONSE,FOLLOW_UP,RELATED]',
     ];
 
     protected $validationMessages = [
@@ -178,29 +156,33 @@ class CorrespondenceModel extends Model
 
     /**
      * Get all correspondences with organization and user details
-     * 
+     *
      * @return array
      */
     public function getAllWithDetails()
     {
-        return $this->select('correspondences.*, organizations.org_name, organizations.org_code, users.name as registered_by_name')
+        return $this->select('correspondences.*, organizations.org_name, organizations.org_code, users.name as registered_by_name, correspondence_types.name as correspondence_type_name, groups.group_name')
             ->join('organizations', 'organizations.id = correspondences.organization_id', 'left')
+            ->join('groups', 'groups.id = correspondences.group_id', 'left')
             ->join('users', 'users.id = correspondences.registered_by', 'left')
+            ->join('correspondence_types', 'correspondence_types.type_number = correspondences.correspondence_type', 'left')
             ->orderBy('correspondences.created_at', 'DESC')
             ->findAll();
     }
 
     /**
      * Get correspondence by ID with details
-     * 
+     *
      * @param int $id
      * @return array|null
      */
     public function getWithDetails($id)
     {
-        return $this->select('correspondences.*, organizations.org_name, organizations.org_code, users.name as registered_by_name, users.email as registered_by_email')
+        return $this->select('correspondences.*, organizations.org_name, organizations.org_code, users.name as registered_by_name, users.email as registered_by_email, correspondence_types.name as correspondence_type_name, groups.group_name')
             ->join('organizations', 'organizations.id = correspondences.organization_id', 'left')
+            ->join('groups', 'groups.id = correspondences.group_id', 'left')
             ->join('users', 'users.id = correspondences.registered_by', 'left')
+            ->join('correspondence_types', 'correspondence_types.type_number = correspondences.correspondence_type', 'left')
             ->where('correspondences.id', $id)
             ->first();
     }

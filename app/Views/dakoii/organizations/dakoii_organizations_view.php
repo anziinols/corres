@@ -67,11 +67,17 @@
                     <?php endif; ?>
 
                     <?php if ($organization['org_logo']): ?>
+                        <?php
+                            // Handle both old (filename only) and new (full path with public/ prefix) formats
+                            $logoPath = strpos($organization['org_logo'], 'public/') === 0
+                                ? $organization['org_logo']
+                                : 'public/uploads/organizations/' . $organization['org_logo'];
+                        ?>
                         <div class="mb-3">
                             <label class="text-muted mb-1">Organization Logo</label>
                             <div>
-                                <img src="<?= base_url('uploads/organizations/' . esc($organization['org_logo'])) ?>" 
-                                     alt="<?= esc($organization['org_name']) ?>" 
+                                <img src="<?= base_url(esc($logoPath)) ?>"
+                                     alt="<?= esc($organization['org_name']) ?>"
                                      class="img-thumbnail"
                                      style="max-width: 300px; max-height: 300px;">
                             </div>

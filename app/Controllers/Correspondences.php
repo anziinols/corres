@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\CorrespondenceModel;
 use App\Models\OrganizationModel;
+use App\Models\GroupModel;
 use App\Models\UserModel;
 use CodeIgniter\RESTful\ResourceController;
 
@@ -46,6 +47,7 @@ class Correspondences extends ResourceController
     public function new()
     {
         $orgModel = new OrganizationModel();
+        $groupModel = new GroupModel();
         $userModel = new UserModel();
         $corrModel = new CorrespondenceModel();
         $typeModel = new \App\Models\CorrespondenceTypeModel();
@@ -53,9 +55,11 @@ class Correspondences extends ResourceController
         $data = [
             'title' => 'Register New Correspondence',
             'organizations' => $orgModel->where('status', 'active')->findAll(),
+            'groups' => $groupModel->where('status', 'active')->findAll(),
             'users' => $userModel->where('status', 'active')->findAll(),
             'correspondence_types' => $typeModel->orderBy('type_number', 'ASC')->findAll(),
             'suggested_number' => $corrModel->generateCorrespondenceNumber(),
+            'existing_correspondences' => $corrModel->select('id, correspondence_number, subject')->orderBy('created_at', 'DESC')->findAll(),
             'ai_api_key' => getenv('AI_API_KEY'),
             'ai_model' => getenv('AI_MODEL'),
         ];
@@ -85,9 +89,10 @@ class Correspondences extends ResourceController
         $file = $this->request->getFile('correspondence_file');
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $newName = $file->getRandomName();
-            // Move to writable/uploads/correspondences
-            $file->move(WRITEPATH . 'uploads/correspondences', $newName);
-            $postData['file_path'] = 'uploads/correspondences/' . $newName;
+            // Move to public/uploads/correspondences using ROOTPATH
+            $file->move(ROOTPATH . 'public/uploads/correspondences', $newName);
+            // Store path with public/ prefix
+            $postData['file_path'] = 'public/uploads/correspondences/' . $newName;
             $postData['file_type'] = $file->getClientMimeType();
         }
         
@@ -95,10 +100,24 @@ class Correspondences extends ResourceController
         $postData['registered_by'] = $this->session->get('dakoii_user_id');
         
         if ($corrModel->save($postData)) {
+            $newId = $corrModel->getInsertID();
+
+            // Handle Linked Correspondences
+            $linkedIds = $this->request->getPost('linked_correspondence_ids');
+            if (!empty($linkedIds) && is_array($linkedIds)) {
+                $linkModel = new \App\Models\CorrespondenceLinkModel();
+                foreach ($linkedIds as $linkId) {
+                    $linkModel->insert([
+                        'correspondence_id' => $newId,
+                        'linked_correspondence_id' => $linkId
+                    ]);
+                }
+            }
+
             return $this->respondCreated([
                 'success' => true,
                 'message' => 'Correspondence registered successfully',
-                'id' => $corrModel->getInsertID(),
+                'id' => $newId,
                 'csrf_token_name' => csrf_token(),
                 'csrf_token_value' => csrf_hash(),
             ]);
@@ -130,9 +149,17 @@ class Correspondences extends ResourceController
                 ->with('error', 'Correspondence not found.');
         }
 
+        // Get linked correspondences
+        $linkModel = new \App\Models\CorrespondenceLinkModel();
+        $linked = $linkModel->select('correspondences.id, correspondences.correspondence_number, correspondences.subject')
+            ->join('correspondences', 'correspondences.id = correspondence_links.linked_correspondence_id')
+            ->where('correspondence_links.correspondence_id', $id)
+            ->findAll();
+
         $data = [
             'title' => 'View Correspondence',
             'correspondence' => $correspondence,
+            'linked_correspondences' => $linked
         ];
 
         return view('admin/correspondences/correspondences_view', $data);
@@ -156,15 +183,29 @@ class Correspondences extends ResourceController
         }
 
         $orgModel = new OrganizationModel();
+        $groupModel = new GroupModel();
         $userModel = new UserModel();
         $typeModel = new \App\Models\CorrespondenceTypeModel();
+        $linkModel = new \App\Models\CorrespondenceLinkModel();
+
+        // Get currently linked IDs
+        $currentLinks = $linkModel->where('correspondence_id', $id)->findAll();
+        $linkedIds = array_column($currentLinks, 'linked_correspondence_id');
+
+        // Get all existing correspondences for the dropdown (exclude current)
+        $existing = $corrModel->where('id !=', $id)
+                             ->orderBy('created_at', 'DESC')
+                             ->findAll();
 
         $data = [
             'title' => 'Edit Correspondence',
             'correspondence' => $correspondence,
             'organizations' => $orgModel->where('status', 'active')->findAll(),
+            'groups' => $groupModel->where('status', 'active')->findAll(),
             'users' => $userModel->where('status', 'active')->findAll(),
             'correspondence_types' => $typeModel->orderBy('type_number', 'ASC')->findAll(),
+            'existing_correspondences' => $existing,
+            'linked_correspondence_ids' => $linkedIds
         ];
 
         return view('admin/correspondences/correspondences_edit', $data);
@@ -192,8 +233,38 @@ class Correspondences extends ResourceController
         }
 
         $postData = $this->request->getPost();
+        $postData['id'] = $id; // Inject ID for validation rules that use {id} placeholder
+
+        // Handle File Upload (Optional replacement)
+        $file = $this->request->getFile('correspondence_file');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            // Move to public/uploads/correspondences using ROOTPATH
+            $file->move(ROOTPATH . 'public/uploads/correspondences', $newName);
+            // Store path with public/ prefix
+            $postData['file_path'] = 'public/uploads/correspondences/' . $newName;
+            $postData['file_type'] = $file->getClientMimeType();
+        }
         
-        if ($corrModel->update($id, $postData)) {
+        // Use save() instead of update() as it handles IDs and validation cleaner
+        if ($corrModel->save($postData)) {
+            // Handle Linked Correspondences Sync
+            $linkModel = new \App\Models\CorrespondenceLinkModel();
+            
+            // Delete existing
+            $linkModel->where('correspondence_id', $id)->delete();
+
+            // Insert new
+            $linkedIds = $this->request->getPost('linked_correspondence_ids');
+            if (!empty($linkedIds) && is_array($linkedIds)) {
+                foreach ($linkedIds as $linkId) {
+                    $linkModel->insert([
+                        'correspondence_id' => $id,
+                        'linked_correspondence_id' => $linkId
+                    ]);
+                }
+            }
+
             return $this->respond([
                 'success' => true,
                 'message' => 'Correspondence updated successfully',

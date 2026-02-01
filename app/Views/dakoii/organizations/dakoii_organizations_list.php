@@ -58,12 +58,18 @@
                                         <tr>
                                             <td>
                                                 <?php if ($org['org_logo']): ?>
-                                                    <img src="<?= base_url('uploads/organizations/' . esc($org['org_logo'])) ?>" 
-                                                         alt="<?= esc($org['org_name']) ?>" 
+                                                    <?php
+                                                        // Handle both old (filename only) and new (full path with public/ prefix) formats
+                                                        $logoPath = strpos($org['org_logo'], 'public/') === 0
+                                                            ? $org['org_logo']
+                                                            : 'public/uploads/organizations/' . $org['org_logo'];
+                                                    ?>
+                                                    <img src="<?= base_url(esc($logoPath)) ?>"
+                                                         alt="<?= esc($org['org_name']) ?>"
                                                          class="rounded"
                                                          style="width: 50px; height: 50px; object-fit: cover;">
                                                 <?php else: ?>
-                                                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
+                                                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
                                                          style="width: 50px; height: 50px;">
                                                         <i class="bi bi-building text-white"></i>
                                                     </div>

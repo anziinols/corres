@@ -81,10 +81,13 @@ class Organizations extends ResourceController
             }
 
             // Generate unique filename
-            $logoFileName = $logoFile->getRandomName();
-            
-            // Move file to upload directory
-            $logoFile->move(FCPATH . 'uploads/organizations', $logoFileName);
+            $newFileName = $logoFile->getRandomName();
+
+            // Move file to upload directory using ROOTPATH
+            $logoFile->move(ROOTPATH . 'public/uploads/organizations', $newFileName);
+
+            // Store path with public/ prefix
+            $logoFileName = 'public/uploads/organizations/' . $newFileName;
         }
 
         // Prepare data
@@ -102,8 +105,8 @@ class Organizations extends ResourceController
                 ->with('success', 'Organization created successfully!');
         } else {
             // Delete uploaded file if insertion failed
-            if ($logoFileName && file_exists(FCPATH . 'uploads/organizations/' . $logoFileName)) {
-                unlink(FCPATH . 'uploads/organizations/' . $logoFileName);
+            if ($logoFileName && file_exists(ROOTPATH . $logoFileName)) {
+                unlink(ROOTPATH . $logoFileName);
             }
 
             return redirect()->back()
@@ -198,16 +201,24 @@ class Organizations extends ResourceController
                     ->with('error', 'Logo file size must not exceed 2MB.');
             }
 
-            // Delete old logo if exists
-            if ($organization['org_logo'] && file_exists(FCPATH . 'uploads/organizations/' . $organization['org_logo'])) {
-                unlink(FCPATH . 'uploads/organizations/' . $organization['org_logo']);
+            // Delete old logo if exists (handle both old and new path formats)
+            if ($organization['org_logo']) {
+                $oldPath = strpos($organization['org_logo'], 'public/') === 0
+                    ? ROOTPATH . $organization['org_logo']
+                    : ROOTPATH . 'public/uploads/organizations/' . $organization['org_logo'];
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
 
             // Generate unique filename
-            $logoFileName = $logoFile->getRandomName();
-            
-            // Move file to upload directory
-            $logoFile->move(FCPATH . 'uploads/organizations', $logoFileName);
+            $newFileName = $logoFile->getRandomName();
+
+            // Move file to upload directory using ROOTPATH
+            $logoFile->move(ROOTPATH . 'public/uploads/organizations', $newFileName);
+
+            // Store path with public/ prefix
+            $logoFileName = 'public/uploads/organizations/' . $newFileName;
         }
 
         // Prepare data
@@ -227,8 +238,8 @@ class Organizations extends ResourceController
                 ->with('success', 'Organization updated successfully!');
         } else {
             // Delete uploaded file if update failed and it's a new file
-            if ($logoFileName !== $organization['org_logo'] && $logoFileName && file_exists(FCPATH . 'uploads/organizations/' . $logoFileName)) {
-                unlink(FCPATH . 'uploads/organizations/' . $logoFileName);
+            if ($logoFileName !== $organization['org_logo'] && $logoFileName && file_exists(ROOTPATH . $logoFileName)) {
+                unlink(ROOTPATH . $logoFileName);
             }
 
             return redirect()->back()

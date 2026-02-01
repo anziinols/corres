@@ -99,14 +99,14 @@ class Users extends ResourceController
         $signatureFile = $this->request->getFile('signature_file');
         if ($signatureFile && $signatureFile->isValid() && !$signatureFile->hasMoved()) {
             $signatureName = $signatureFile->getRandomName();
-            $signatureFile->move(FCPATH . 'uploads/signatures', $signatureName);
+            $signatureFile->move(ROOTPATH . 'public/uploads/signatures', $signatureName);
             $signatureFilepath = 'public/uploads/signatures/' . $signatureName;
         }
 
         $stampFile = $this->request->getFile('stamp_file');
         if ($stampFile && $stampFile->isValid() && !$stampFile->hasMoved()) {
             $stampName = $stampFile->getRandomName();
-            $stampFile->move(FCPATH . 'uploads/stamps', $stampName);
+            $stampFile->move(ROOTPATH . 'public/uploads/stamps', $stampName);
             $stampFilepath = 'public/uploads/stamps/' . $stampName;
         }
 
@@ -242,22 +242,22 @@ class Users extends ResourceController
         $signatureFile = $this->request->getFile('signature_file');
         if ($signatureFile && $signatureFile->isValid() && !$signatureFile->hasMoved()) {
             // Delete old file if exists
-            if ($user['signature_filepath'] && file_exists($user['signature_filepath'])) {
-                @unlink($user['signature_filepath']);
+            if ($user['signature_filepath'] && file_exists(ROOTPATH . $user['signature_filepath'])) {
+                @unlink(ROOTPATH . $user['signature_filepath']);
             }
             $signatureName = $signatureFile->getRandomName();
-            $signatureFile->move(FCPATH . 'uploads/signatures', $signatureName);
+            $signatureFile->move(ROOTPATH . 'public/uploads/signatures', $signatureName);
             $signatureFilepath = 'public/uploads/signatures/' . $signatureName;
         }
 
         $stampFile = $this->request->getFile('stamp_file');
         if ($stampFile && $stampFile->isValid() && !$stampFile->hasMoved()) {
             // Delete old file if exists
-            if ($user['stamp_filepath'] && file_exists($user['stamp_filepath'])) {
-                @unlink($user['stamp_filepath']);
+            if ($user['stamp_filepath'] && file_exists(ROOTPATH . $user['stamp_filepath'])) {
+                @unlink(ROOTPATH . $user['stamp_filepath']);
             }
             $stampName = $stampFile->getRandomName();
-            $stampFile->move(FCPATH . 'uploads/stamps', $stampName);
+            $stampFile->move(ROOTPATH . 'public/uploads/stamps', $stampName);
             $stampFilepath = 'public/uploads/stamps/' . $stampName;
         }
 

@@ -25,6 +25,7 @@ $routes->group('', ['filter' => 'csrf'], static function ($routes) {
         $routes->get('correspondences/generate-number', 'Correspondences::generateNumber');
         $routes->get('correspondences/(:num)', 'Correspondences::show/$1');
         $routes->get('correspondences/(:num)/edit', 'Correspondences::edit/$1');
+        $routes->post('correspondences/(:num)', 'Correspondences::update/$1'); // Added for multipart updates
         $routes->put('correspondences/(:num)', 'Correspondences::update/$1');
         $routes->patch('correspondences/(:num)', 'Correspondences::update/$1');
         $routes->delete('correspondences/(:num)', 'Correspondences::delete/$1');
