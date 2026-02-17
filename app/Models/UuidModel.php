@@ -37,12 +37,18 @@ class UuidModel extends Model
 
     protected function convertUuidToString(array $data): array
     {
-        if (isset($data['data'])) {
-            $data['data'] = $this->convertRecordUuids($data['data']);
-        } elseif (isset($data['data'][0]) && is_array($data['data'][0])) {
+        if (!isset($data['data'])) {
+            return $data;
+        }
+
+        // Check if it's an array of records (indexed array)
+        if (isset($data['data'][0]) && is_array($data['data'][0])) {
             foreach ($data['data'] as &$record) {
                 $record = $this->convertRecordUuids($record);
             }
+        } elseif (is_array($data['data'])) {
+            // Single record (associative array)
+            $data['data'] = $this->convertRecordUuids($data['data']);
         }
 
         return $data;
