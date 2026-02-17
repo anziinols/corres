@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
-
-class GroupModel extends Model
+class GroupModel extends UuidModel
 {
     protected $table            = 'groups';
     protected $primaryKey       = 'id';
-    protected $useAutoIncrement = true;
+    protected $useAutoIncrement = false;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
@@ -24,19 +22,17 @@ class GroupModel extends Model
         'deleted_by',
     ];
 
-    // Dates
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    // Validation
     protected $validationRules = [
         'group_code' => 'required|max_length[10]|is_unique[groups.group_code,id,{id}]',
         'group_name' => 'required|max_length[255]',
-        'organization_id' => 'required|numeric',
-        'parent_id' => 'permit_empty|numeric',
+        'organization_id' => 'required',
+        'parent_id' => 'permit_empty',
         'description' => 'permit_empty',
         'status' => 'permit_empty|in_list[active,inactive]',
     ];
@@ -53,34 +49,59 @@ class GroupModel extends Model
         ],
         'organization_id' => [
             'required' => 'Organization is required',
-            'numeric' => 'Invalid organization',
         ],
     ];
 
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
-    // Callbacks
-    protected $allowCallbacks = true;
-    protected $beforeInsert   = ['setCreatedBy'];
-    protected $beforeUpdate   = ['setUpdatedBy'];
-    protected $beforeDelete   = ['setDeletedBy'];
+    protected function getUuidFields(): array
+    {
+        return [
+            'id',
+            'organization_id',
+            'parent_id',
+            'created_by',
+            'updated_by',
+            'deleted_by',
+        ];
+    }
 
-    /**
-     * Generate next available group code with g2 prefix
-     * 
-     * @return string Code starting with g2 (g201, g202, g203, etc.)
-     */
+    protected function beforeInsert(array $data): array
+    {
+        $data = parent::beforeInsert($data);
+        $data = $this->convertForeignKeysToBinary($data);
+        return $data;
+    }
+
+    protected function beforeUpdate(array $data): array
+    {
+        $data = parent::beforeUpdate($data);
+        $data = $this->convertForeignKeysToBinary($data);
+        return $data;
+    }
+
+    private function convertForeignKeysToBinary(array $data): array
+    {
+        $foreignKeys = ['organization_id', 'parent_id'];
+
+        foreach ($foreignKeys as $key) {
+            if (isset($data['data'][$key]) && is_string($data['data'][$key]) && strlen($data['data'][$key]) === 36) {
+                $data['data'][$key] = \App\Helpers\UuidHelper::toBinary($data['data'][$key]);
+            }
+        }
+
+        return $data;
+    }
+
     public function generateGroupCode(): string
     {
-        // Get all groups with codes starting with g2
         $groups = $this->select('group_code')
             ->like('group_code', 'g2', 'after')
             ->withDeleted()
             ->findAll();
 
         if (!empty($groups)) {
-            // Extract numeric parts and find the maximum
             $maxNumber = 0;
             foreach ($groups as $group) {
                 $numericPart = (int) substr($group['group_code'], 2);
@@ -90,31 +111,18 @@ class GroupModel extends Model
             }
             $nextNumber = $maxNumber + 1;
         } else {
-            // Start with 01 if no groups exist (g201)
             $nextNumber = 1;
         }
 
         return 'g2' . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
     }
 
-    /**
-     * Get next available group code for display
-     * 
-     * @return string
-     */
     public function getNextGroupCode(): string
     {
         return $this->generateGroupCode();
     }
 
-    /**
-     * Check if group code is unique (excluding current record during update)
-     * 
-     * @param string $groupCode
-     * @param int|null $excludeId
-     * @return bool
-     */
-    public function isGroupCodeUnique(string $groupCode, ?int $excludeId = null): bool
+    public function isGroupCodeUnique(string $groupCode, ?string $excludeId = null): bool
     {
         $builder = $this->where('group_code', $groupCode);
         
@@ -125,13 +133,7 @@ class GroupModel extends Model
         return $builder->withDeleted()->countAllResults() === 0;
     }
 
-    /**
-     * Get all groups for a specific organization with audit information
-     * 
-     * @param int $organizationId
-     * @return array
-     */
-    public function getGroupsByOrganization(int $organizationId): array
+    public function getGroupsByOrganization(string $organizationId): array
     {
         return $this->select('groups.*, 
                              parent.group_name as parent_name,
@@ -145,11 +147,6 @@ class GroupModel extends Model
             ->findAll();
     }
 
-    /**
-     * Get all groups with organization and audit information
-     * 
-     * @return array
-     */
     public function getGroupsWithAudit(): array
     {
         return $this->select('groups.*, 
@@ -165,13 +162,7 @@ class GroupModel extends Model
             ->findAll();
     }
 
-    /**
-     * Get single group with audit information
-     * 
-     * @param int $id
-     * @return array|null
-     */
-    public function getGroupWithAudit(int $id): ?array
+    public function getGroupWithAudit(string $id): ?array
     {
         return $this->select('groups.*, 
                              organizations.org_name,
@@ -186,15 +177,7 @@ class GroupModel extends Model
             ->find($id);
     }
 
-    /**
-     * Get available parent groups for a specific organization
-     * Excludes the current group to prevent circular references
-     * 
-     * @param int $organizationId
-     * @param int|null $excludeId
-     * @return array
-     */
-    public function getAvailableParentGroups(int $organizationId, ?int $excludeId = null): array
+    public function getAvailableParentGroups(string $organizationId, ?string $excludeId = null): array
     {
         $builder = $this->select('id, group_code, group_name')
             ->where('organization_id', $organizationId)
@@ -206,54 +189,4 @@ class GroupModel extends Model
         
         return $builder->orderBy('group_name', 'ASC')->findAll();
     }
-
-    /**
-     * Set created_by field before insert
-     * 
-     * @param array $data
-     * @return array
-     */
-    protected function setCreatedBy(array $data): array
-    {
-        if (!isset($data['data']['created_by'])) {
-            $session = session();
-            if ($session->has('dakoii_user_id')) {
-                $data['data']['created_by'] = $session->get('dakoii_user_id');
-            }
-        }
-        return $data;
-    }
-
-    /**
-     * Set updated_by field before update
-     * 
-     * @param array $data
-     * @return array
-     */
-    protected function setUpdatedBy(array $data): array
-    {
-        if (!isset($data['data']['updated_by'])) {
-            $session = session();
-            if ($session->has('dakoii_user_id')) {
-                $data['data']['updated_by'] = $session->get('dakoii_user_id');
-            }
-        }
-        return $data;
-    }
-
-    /**
-     * Set deleted_by field before soft delete
-     * 
-     * @param array $data
-     * @return array
-     */
-    protected function setDeletedBy(array $data): array
-    {
-        $session = session();
-        if ($session->has('dakoii_user_id')) {
-            $this->update($data['id'], ['deleted_by' => $session->get('dakoii_user_id')]);
-        }
-        return $data;
-    }
 }
-

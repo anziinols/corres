@@ -5,7 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title><?= isset($title) ? $title . ' - ' : '' ?>Correspondence Management System</title>
-    <meta name="description" content="Correspondence Management System - Efficient document tracking and management">
+    <meta name="description" content="CORRES - Professional Correspondence Management System for enterprise organizations. Streamline document tracking, workflow management, and boost productivity.">
+    <meta name="keywords" content="correspondence management, document tracking, workflow management, enterprise software, document management system">
+    <meta name="author" content="Dakoii Systems">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="CORRES - Corporate Correspondence Management System">
+    <meta property="og:description" content="Professional document tracking and management solution for enterprise organizations.">
+    <meta property="og:image" content="<?= base_url('public/assets/images/corres_logo.png') ?>">
+    <meta property="og:url" content="<?= current_url() ?>">
+    <meta property="og:site_name" content="CORRES">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CORRES - Corporate Correspondence Management System">
+    <meta name="twitter:description" content="Professional document tracking and management solution for enterprise organizations.">
+    <meta name="twitter:image" content="<?= base_url('public/assets/images/corres_logo.png') ?>">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?= base_url('public/assets/images/corres_favicon.ico') ?>">
@@ -15,6 +32,14 @@
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Landing Page CSS -->
+    <link rel="stylesheet" href="<?= base_url('public/assets/css/landing.css') ?>">
     
     <!-- Custom CSS -->
     <style>
@@ -30,8 +55,9 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: var(--dark-text);
+            line-height: 1.6;
         }
         
         .navbar {
@@ -127,34 +153,76 @@
         .text-muted-corporate {
             color: var(--corporate-gray);
         }
+        
+        /* Accessibility improvements */
+        .visually-hidden-focusable {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        
+        .visually-hidden-focusable:focus {
+            position: static !important;
+            width: auto !important;
+            height: auto !important;
+            padding: inherit !important;
+            margin: inherit !important;
+            overflow: visible !important;
+            clip: auto !important;
+            white-space: normal !important;
+        }
+        
+        .hover-opacity {
+            transition: opacity 0.3s ease;
+        }
+        
+        .hover-opacity:hover {
+            opacity: 0.8 !important;
+        }
+        
+        /* Footer link hover effects */
+        footer a:hover {
+            opacity: 0.8;
+        }
     </style>
     
     <?= $this->renderSection('styles') ?>
 </head>
 <body class="d-flex flex-column min-vh-100">
     
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="visually-hidden-focusable btn btn-primary position-absolute m-2" style="z-index: 9999;">Skip to main content</a>
+    
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark" role="navigation" aria-label="Main navigation">
         <div class="container">
-            <a class="navbar-brand" href="<?= base_url() ?>">
-                <img src="<?= base_url('public/assets/images/corres_logo.png') ?>" alt="Correspondence Management System">
+            <a class="navbar-brand" href="<?= base_url() ?>" aria-label="CORRES Home">
+                <img src="<?= base_url('public/assets/images/corres_logo.png') ?>" alt="CORRES Logo">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url() ?>">Home</a>
+                        <a class="nav-link" href="<?= base_url() ?>" aria-current="<?= uri_string() === '' ? 'page' : 'false' ?>">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('about') ?>">About</a>
+                        <a class="nav-link" href="<?= base_url('about') ?>" aria-current="<?= uri_string() === 'about' ? 'page' : 'false' ?>">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('contact') ?>">Contact</a>
+                        <a class="nav-link" href="<?= base_url('contact') ?>" aria-current="<?= uri_string() === 'contact' ? 'page' : 'false' ?>">Contact</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-light text-primary ms-2 px-3" href="<?= base_url('login') ?>">Login</a>
+                        <a class="nav-link btn btn-light text-primary ms-2 px-3" href="<?= base_url('login') ?>">
+                            <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Login
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -162,28 +230,60 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main id="main-content" class="main-content" role="main">
         <?= $this->renderSection('content') ?>
     </main>
 
     <!-- Footer -->
-    <footer class="footer mt-auto">
+    <footer class="footer mt-auto" role="contentinfo">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-4">
-                    <h5>Correspondence Management System</h5>
-                    <p class="mb-0 small">Efficient document tracking and management solution</p>
-                </div>
-                <div class="col-md-4 text-center">
-                    <p class="mb-0">&copy; <?= date('Y') ?> All rights reserved.</p>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <div class="d-flex align-items-center justify-content-md-end justify-content-start mt-md-0 mt-3">
-                        <span class="me-2">Developed by</span>
-                        <a href="https://www.dakoiims.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
-                            <img src="<?= base_url('public/assets/images/dakoii_systems_logo.png') ?>" alt="Dakoii Systems" style="height: 35px; width: auto;" class="ms-1">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="mb-3">CORRES</h5>
+                    <p class="mb-3 small">Professional correspondence management system for enterprise organizations. Streamline your document workflows with confidence.</p>
+                    <div class="d-flex gap-3">
+                        <a href="https://www.dakoiims.com/" target="_blank" rel="noopener noreferrer" class="text-white" aria-label="Visit Dakoii Systems Website">
+                            <i class="bi bi-globe fs-5"></i>
+                        </a>
+                        <a href="<?= base_url('contact') ?>" class="text-white" aria-label="Contact Us">
+                            <i class="bi bi-envelope fs-5"></i>
                         </a>
                     </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h6 class="mb-3">Quick Links</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="<?= base_url() ?>" class="text-white text-decoration-none hover-opacity"><i class="bi bi-chevron-right small me-1"></i>Home</a></li>
+                        <li class="mb-2"><a href="<?= base_url('about') ?>" class="text-white text-decoration-none hover-opacity"><i class="bi bi-chevron-right small me-1"></i>About Us</a></li>
+                        <li class="mb-2"><a href="<?= base_url('contact') ?>" class="text-white text-decoration-none hover-opacity"><i class="bi bi-chevron-right small me-1"></i>Contact</a></li>
+                        <li class="mb-2"><a href="<?= base_url('login') ?>" class="text-white text-decoration-none hover-opacity"><i class="bi bi-chevron-right small me-1"></i>Login</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-4">
+                    <h6 class="mb-3">Contact Information</h6>
+                    <ul class="list-unstyled mb-3">
+                        <li class="mb-2"><i class="bi bi-envelope me-2"></i>support@dakoiims.com</li>
+                        <li class="mb-2"><i class="bi bi-clock me-2"></i>24/7 Support Available</li>
+                    </ul>
+                    <div class="d-flex align-items-center">
+                        <span class="me-2 small">Developed by</span>
+                        <a href="https://www.dakoiims.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                            <img src="<?= base_url('public/assets/images/dakoii_systems_logo.png') ?>" alt="Dakoii Systems" style="height: 30px; width: auto;" class="ms-1">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="my-4 opacity-25">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 small">&copy; <?= date('Y') ?> CORRES. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="mb-0 small">Built with <i class="bi bi-heart-fill text-danger"></i> by Dakoii Systems</p>
                 </div>
             </div>
         </div>
@@ -195,59 +295,3 @@
     <?= $this->renderSection('scripts') ?>
 </body>
 </html>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url() ?>">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('about') ?>">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('contact') ?>">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-light text-primary ms-2 px-3" href="<?= base_url('login') ?>">Login</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <?= $this->renderSection('content') ?>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer mt-auto">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-4">
-                    <h5>Correspondence Management System</h5>
-                    <p class="mb-0 small">Efficient document tracking and management solution</p>
-                </div>
-                <div class="col-md-4 text-center">
-                    <p class="mb-0">&copy; <?= date('Y') ?> All rights reserved.</p>
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <div class="d-flex align-items-center justify-content-md-end justify-content-start mt-md-0 mt-3">
-                        <span class="me-2">Developed by</span>
-                        <a href="https://www.dakoiims.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
-                            <img src="<?= base_url('public/assets/images/dakoii_systems_logo.png') ?>" alt="Dakoii Systems" style="height: 35px; width: auto;" class="ms-1">
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <?= $this->renderSection('scripts') ?>
-</body>
-</html>
-
-

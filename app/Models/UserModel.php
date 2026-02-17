@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
-
-class UserModel extends Model
+class UserModel extends UuidModel
 {
     protected $table            = 'users';
     protected $primaryKey       = 'id';
-    protected $useAutoIncrement = true;
+    protected $useAutoIncrement = false;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
@@ -30,20 +28,18 @@ class UserModel extends Model
         'deleted_by',
     ];
 
-    // Dates
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    // Validation
     protected $validationRules = [
         'name' => 'required|max_length[255]',
         'email' => 'required|valid_email|max_length[255]|is_unique[users.email,id,{id}]',
         'password' => 'required|min_length[4]',
-        'organization_id' => 'required|numeric',
-        'group_id' => 'permit_empty|numeric',
+        'organization_id' => 'required',
+        'group_id' => 'permit_empty',
         'status' => 'permit_empty|in_list[active,inactive]',
         'position' => 'permit_empty|max_length[255]',
         'signature_filepath' => 'permit_empty|max_length[255]',
@@ -70,44 +66,65 @@ class UserModel extends Model
         ],
         'organization_id' => [
             'required' => 'Organization is required',
-            'numeric' => 'Invalid organization',
         ],
     ];
 
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
-    // Callbacks
-    protected $allowCallbacks = true;
-    protected $beforeInsert   = ['hashPassword', 'setCreatedBy'];
-    protected $beforeUpdate   = ['hashPassword', 'setUpdatedBy'];
-    protected $beforeDelete   = ['setDeletedBy'];
+    protected $beforeInsert   = ['hashPassword'];
+    protected $beforeUpdate   = ['hashPassword'];
 
-    /**
-     * Hash password before insert/update
-     * 
-     * @param array $data
-     * @return array
-     */
+    protected function getUuidFields(): array
+    {
+        return [
+            'id',
+            'organization_id',
+            'group_id',
+            'created_by',
+            'updated_by',
+            'deleted_by',
+        ];
+    }
+
+    protected function beforeInsert(array $data): array
+    {
+        $data = parent::beforeInsert($data);
+        $data = $this->convertForeignKeysToBinary($data);
+        return $data;
+    }
+
+    protected function beforeUpdate(array $data): array
+    {
+        $data = parent::beforeUpdate($data);
+        $data = $this->convertForeignKeysToBinary($data);
+        return $data;
+    }
+
+    private function convertForeignKeysToBinary(array $data): array
+    {
+        $foreignKeys = ['organization_id', 'group_id'];
+
+        foreach ($foreignKeys as $key) {
+            if (isset($data['data'][$key]) && is_string($data['data'][$key]) && strlen($data['data'][$key]) === 36) {
+                $data['data'][$key] = \App\Helpers\UuidHelper::toBinary($data['data'][$key]);
+            }
+        }
+
+        return $data;
+    }
+
     protected function hashPassword(array $data): array
     {
         if (isset($data['data']['password']) && !empty($data['data']['password'])) {
             $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
         } elseif (isset($data['data']['password']) && empty($data['data']['password'])) {
-            // Remove password field if empty during update
             unset($data['data']['password']);
         }
         
         return $data;
     }
 
-    /**
-     * Verify user password
-     * 
-     * @param string $email
-     * @param string $password
-     * @return array|null
-     */
     public function verifyCredentials(string $email, string $password): ?array
     {
         $user = $this->where('email', $email)
@@ -121,13 +138,7 @@ class UserModel extends Model
         return null;
     }
 
-    /**
-     * Get all users for a specific organization with audit information
-     * 
-     * @param int $organizationId
-     * @return array
-     */
-    public function getUsersByOrganization(int $organizationId): array
+    public function getUsersByOrganization(string $organizationId): array
     {
         return $this->select('users.*, 
                              groups.group_name,
@@ -142,11 +153,6 @@ class UserModel extends Model
             ->findAll();
     }
 
-    /**
-     * Get all users with organization and audit information
-     * 
-     * @return array
-     */
     public function getUsersWithAudit(): array
     {
         return $this->select('users.*, 
@@ -164,13 +170,7 @@ class UserModel extends Model
             ->findAll();
     }
 
-    /**
-     * Get single user with audit information
-     * 
-     * @param int $id
-     * @return array|null
-     */
-    public function getUserWithAudit(int $id): ?array
+    public function getUserWithAudit(string $id): ?array
     {
         return $this->select('users.*, 
                              organizations.org_name,
@@ -185,54 +185,4 @@ class UserModel extends Model
             ->join('dakoii_users as updater', 'updater.id = users.updated_by', 'left')
             ->find($id);
     }
-
-    /**
-     * Set created_by field before insert
-     * 
-     * @param array $data
-     * @return array
-     */
-    protected function setCreatedBy(array $data): array
-    {
-        if (!isset($data['data']['created_by'])) {
-            $session = session();
-            if ($session->has('dakoii_user_id')) {
-                $data['data']['created_by'] = $session->get('dakoii_user_id');
-            }
-        }
-        return $data;
-    }
-
-    /**
-     * Set updated_by field before update
-     * 
-     * @param array $data
-     * @return array
-     */
-    protected function setUpdatedBy(array $data): array
-    {
-        if (!isset($data['data']['updated_by'])) {
-            $session = session();
-            if ($session->has('dakoii_user_id')) {
-                $data['data']['updated_by'] = $session->get('dakoii_user_id');
-            }
-        }
-        return $data;
-    }
-
-    /**
-     * Set deleted_by field before soft delete
-     * 
-     * @param array $data
-     * @return array
-     */
-    protected function setDeletedBy(array $data): array
-    {
-        $session = session();
-        if ($session->has('dakoii_user_id')) {
-            $this->update($data['id'], ['deleted_by' => $session->get('dakoii_user_id')]);
-        }
-        return $data;
-    }
 }
-
